@@ -1,0 +1,3 @@
+[submodule "src/Bliss"]
+	path = src/Bliss
+	url = https://github.com/ds4dm/Bliss
