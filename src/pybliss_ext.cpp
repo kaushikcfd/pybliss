@@ -386,6 +386,18 @@ NB_MODULE(pybliss_ext, m) {
            "Compare this graph to *other* in a total order on graphs. Returns "
            "0 if graphs are equal, -1 if this graph is \"smaller than\" the "
            "other, and 1 if this graph is \"greater than\" *other*.")
+      .def(
+          "show_dot",
+          [](Graph &self, nb::object output_to) {
+            nb::module_ pytools_graphviz = nb::module_::import_("pytools.graphviz");
+            const std::string dot_code = capture_string_written_to_file(
+                [&](FILE *fp) { self.write_dot(fp); });
+            pytools_graphviz.attr("show_dot")(nb::str(dot_code.c_str()), output_to);
+          },
+          "output_to"_a = nb::none(),
+          "Visualize the graph.\n\n"
+          ":arg output_to:  Passed on to :func:`pytools.graphviz.show_dot` "
+          "unmodified.")
       .def("__hash__", &Graph::get_hash);
 
   // }}}

@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=1.19",
+    "pytools>=2024.0",
 ]
 
 [project.urls]
