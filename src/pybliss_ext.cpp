@@ -169,6 +169,7 @@ NB_MODULE(pybliss_ext, m) {
                     "Undirected vertex-colored graph.\n\n"
                     "See :class:`DiGraph` for a directed variant.")
       .def(nb::init<>())
+      .def(nb::init<unsigned int>())
       .def(
           "set_verbose_level", &Graph::set_verbose_level, "level"_a,
           "Set the verbose output level for the algorithms\n"
