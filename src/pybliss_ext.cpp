@@ -330,31 +330,29 @@ NB_MODULE(pybliss_ext, m) {
           "evaluate so that it does not consume too much time.\n\n"
 
           "This wraps Graph::canonical_form from the C++-API.")
-      // FIXME: Make from_dimacs compile-able.
-      // .def_static(
-      //     "from_dimacs",
-      //     [](nb::object file_obj) {
-      //       FILE *fp = get_fp_from_writeable_pyobj(file_obj);
-      //       Graph *ptr = nullptr;
-      //       auto err_str = capture_string_written_to_file(
-      //           [&](FILE *err_stream) { ptr = Graph::read_dimacs(fp,
-      //           err_stream); });
-      //       if (!ptr) {
-      //         throw std::runtime_error(
-      //             "Error during reading Graph from DIMACS.\n" + err_str);
-      //       }
-      //       return std::unique_ptr<Graph *>(ptr);
-      //     },
-      //     "fp"_a,
-      //     "Return a graph corresponding to DIMACS-formatted graph present in
-      //     "
-      //     "*fp*. See the `bliss website "
-      //     "<https://users.aalto.fi/tjunttil/bliss>` for the definition of the
-      //     " "file format. Note that in the DIMACS file the vertices are
-      //     numbered " "from 1 to N while in this API they are from 0 to N-1.
-      //     Thus the " "vertex n in the file corresponds to the vertex n-1 in
-      //     the API.\n\n"
-      //     ":arg fp: The file stream from where the graph is to be read.")
+      .def_static(
+          "from_dimacs",
+          [](nb::object file_obj) {
+            FILE *fp = get_fp_from_writeable_pyobj(file_obj);
+            Graph *ptr = nullptr;
+            auto err_str =
+                capture_string_written_to_file([&](FILE *err_stream) {
+                  ptr = Graph::read_dimacs(fp, err_stream);
+                });
+            if (!ptr) {
+              throw std::runtime_error(
+                  "Error during reading Graph from DIMACS.\n" + err_str);
+            }
+            return ptr;
+          },
+          "fp"_a,
+          "Return a graph corresponding to DIMACS-formatted graph present in "
+          "*fp*. See the `bliss website "
+          "<https://users.aalto.fi/tjunttil/bliss>` for the definition of the "
+          "file format. Note that in the DIMACS file the vertices are numbered "
+          "from 1 to N while in this API they are from 0 to N-1. Thus the "
+          "vertex n in the file corresponds to the vertex n-1 in the API.\n\n"
+          ":arg fp: The file stream from where the graph is to be read.")
       .def(
           "write_dimacs",
           [](Graph &self, nb::object file_obj) {
@@ -369,7 +367,6 @@ NB_MODULE(pybliss_ext, m) {
           "to N-1. Thus the vertex n in the file corresponds to the vertex n-1 "
           "in the API.\n\n"
           ":arg fp: The file stream where the graph is to be written.")
-
       .def(
           "write_dot",
           [](Graph &self, nb::object file_obj) {
@@ -379,6 +376,7 @@ NB_MODULE(pybliss_ext, m) {
           "fp"_a,
           "Write the graph to *fp* in the graphviz format.\n\n"
           ":arg fp: The file stream where the graph is to be written.")
+      .def("copy", &Graph::copy, "Returns a copy of this graph.")
       .def("__hash__", &Graph::get_hash);
 
   // }}}
