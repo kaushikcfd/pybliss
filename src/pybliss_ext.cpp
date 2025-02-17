@@ -1,6 +1,7 @@
 #include <bliss/bignum.hh>
 #include <bliss/graph.hh>
 #include <bliss/stats.hh>
+#include <cstring>
 #include <memory>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
@@ -301,11 +302,16 @@ NB_MODULE(pybliss_ext, m) {
             }
 
             if (py_terminate) {
-              cpp_terminate = [&]() { return py_terminate(); };
+              cpp_terminate = py_terminate;
             }
 
             auto perm = self.canonical_form(stats, cpp_report, cpp_terminate);
-            // FIXME: Wrap perm in a Numpy class.
+            nb::module_ np = nb::module_::import_("numpy");
+            auto np_perm =
+                np.attr("empty")(self.get_nof_vertices(), np.attr("uint32"));
+            std::memcpy(nb::cast<nb::ndarray<>>(np_perm).data(), perm,
+                        sizeof(uint32_t) * self.get_nof_vertices());
+            return np_perm;
           },
           "stats"_a, "report"_a = nb::none(), "terminate"_a = nb::none(),
           "Returns `P`, a :class:`numpy.ndarray` on {0, ..., nvertices-1}. "
