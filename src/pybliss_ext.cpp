@@ -184,5 +184,53 @@ NB_MODULE(pybliss_ext, m) {
           "perm"_a,
           " Return true only if *perm* is an automorphism of this graph."
           " *perm* must contain N=this.get_nof_vertices() elements and be a"
-          " bijection on {0,1,...,N-1}, otherwise the result is undefined.");
+          " bijection on {0,1,...,N-1}, otherwise the result is undefined.")
+      .def(
+          "find_automorphisms",
+          [](Graph &self, Stats &stats,
+             const std::function<void(
+                 int, nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
+                                  nb::c_contig>)> &py_report = nullptr,
+             const std::function<bool()> &py_terminate = nullptr) {
+            std::function<void(unsigned int, const unsigned int *)> cpp_report =
+                nullptr;
+            std::function<bool()> cpp_terminate = nullptr;
+
+            if (py_report) {
+              cpp_report = [&](unsigned int n, const unsigned int *aut) {
+                auto np_aut =
+                    nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
+                                nb::c_contig>(aut, {self.get_nof_vertices()});
+                py_report(n, np_aut);
+              };
+            }
+
+            if (py_terminate) {
+              cpp_terminate = [&]() { return py_terminate(); };
+            }
+
+            self.find_automorphisms(stats, cpp_report, cpp_terminate);
+          },
+          "stats"_a, "report"_a = nb::none(), "terminate"_a = nb::none(),
+          "Find a set of generators for the automorphism group of the graph. "
+          "The function *report* (if not None) is called each time a new "
+          "generator for the automorphism group is found. The first argument "
+          "*n* for the function is the length of the automorphism (equal to "
+          "get_nof_vertices()), and the second argument *aut* is the "
+          "automorphism (a bijection on {0,...,nvertices-1}). The memory for "
+          "the automorphism *aut* will be invalidated immediately after the "
+          "return from the *report* function; if you want to use the "
+          "automorphism later, you have to take a copy of it. Do not call any "
+          "member functions from the *report* function.\n\n"
+
+          "The search statistics are copied in *stats*.\n\n"
+
+          "If the *terminate* function argument is given, it is called in each "
+          "search tree node: if the function returns true, then the search is "
+          "terminated and thus not all the automorphisms may have been "
+          "generated. The *terminate* function may be used to limit the time "
+          "spent in bliss in case the graph is too difficult under the "
+          "available time constraints. If used, keep the function simple to "
+          "evaluate so that it does not consume too much time. "
+      );
 }
