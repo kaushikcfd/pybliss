@@ -1,171 +1,12 @@
-#include <bliss/bignum.hh>
 #include <bliss/graph.hh>
 #include <bliss/stats.hh>
 #include <cstring>
-#include <memory>
 #include <nanobind/nanobind.h>
-#include <nanobind/ndarray.h>
+#include <pybliss_ext.h>
 
-namespace nb = nanobind;
-
-using namespace nb::literals;
 using namespace bliss;
 
-namespace {
-void perform_sanity_checks_on_perm_array(
-    const nb::ndarray<uint32_t, nb::ndim<1>> &ary, size_t reqd_size) {
-
-  // Ensure the array is contiguous and has uint32_t dtype
-  if ((ary.stride(0) != 1) || ary.dtype() != nb::dtype<uint32_t>()) {
-    throw std::runtime_error("Input array must be a contiguous uint32 array.");
-  }
-  if (ary.size() != reqd_size) {
-    throw std::runtime_error(
-        "Shape of permutation array must be equal to number of "
-        "vertices in the graph.");
-  }
-}
-
-FILE *get_fp_from_writeable_pyobj(nb::object file_obj) {
-  // Check if the object is None (indicating no file)
-  if (file_obj.is_none()) {
-    throw std::runtime_error("File object is None");
-  }
-
-  // Check if the object has a 'fileno' method
-  if (!nb::hasattr(file_obj, "fileno")) {
-    throw std::runtime_error(
-        "Expected a file-like object with a 'fileno' method");
-  }
-
-  // Check if the object is writable
-  if (!nb::hasattr(file_obj, "write")) {
-    throw std::runtime_error(
-        "File object is not writable (missing 'write' method)");
-  }
-  return nb::cast<FILE *>(file_obj.attr("fileno")());
-}
-
-FILE *get_fp_from_readable_pyobj(nb::object file_obj) {
-  // Check if the object is None (indicating no file)
-  if (file_obj.is_none()) {
-    throw std::runtime_error("File object is None");
-  }
-
-  // Check if the object has a 'fileno' method
-  if (!nb::hasattr(file_obj, "fileno")) {
-    throw std::runtime_error(
-        "Expected a file-like object with a 'fileno' method");
-  }
-
-  // Check if the object is writable
-  if (!nb::hasattr(file_obj, "read")) {
-    throw std::runtime_error(
-        "File object is not readable (missing 'read' method)");
-  }
-  return nb::cast<FILE *>(file_obj.attr("fileno")());
-}
-
-std::string
-capture_string_written_to_file(std::function<void(FILE *)> file_writer) {
-  // unique_ptr to ensure FILE* is properly closed
-  std::unique_ptr<FILE, decltype(&fclose)> fp(tmpfile(), fclose);
-  if (!fp) {
-    throw std::runtime_error("Failed to create temporary file.");
-  }
-
-  file_writer(fp.get());
-  fflush(fp.get()); // Ensure all output is written
-
-  // Get file size
-  if (fseek(fp.get(), 0, SEEK_END) != 0) {
-    throw std::runtime_error("Failed to seek to end of file.");
-  }
-  long size = ftell(fp.get());
-  if (size == -1L) {
-    throw std::runtime_error("Failed to determine file size.");
-  }
-  rewind(fp.get()); // Go back to the beginning
-
-  // Read the content into a string
-  std::string output(size, '\0');
-  fread(&output[0], 1, size, fp.get());
-
-  return output;
-}
-
-} // namespace
-
-NB_MODULE(pybliss_ext, m) {
-  m.doc() = "Wrapper for BLISS-toolkit for graph canonicalization.";
-  m.def(
-      "add", [](int a, int b) { return a + b; }, "a"_a, "b"_a);
-
-  // {{{ BigNum
-
-  nb::class_<BigNum>(m, "BigNum",
-                     "A wrapper class for non-negative big integers.")
-      .def(nb::init<>())
-      .def("assign", &BigNum::assign)
-      .def("multiply", &BigNum::multiply)
-      .def("print_to_file",
-           [](Stats &self, nb::object fp_obj) {
-             FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
-             self.print(fp);
-           })
-      // FIXME: Add a to_python method.
-      .def("__str__", [](Stats &self) {
-        return capture_string_written_to_file(
-            [&](FILE *fp) { self.print(fp); });
-      });
-
-  // }}}
-
-  // {{{ Stats
-
-  nb::class_<Stats>(m, "Stats",
-                    "Records statistics returned by the search algorithms.")
-      .def(nb::init<>())
-      .def("print_to_file",
-           [](Stats &self, nb::object fp_obj) {
-             FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
-             self.print(fp);
-           })
-      .def_prop_ro(
-          "group_size", [](Stats &self) { return self.get_group_size(); },
-          "The size of the automorphism group.")
-      .def_prop_ro(
-          "group_size_approx",
-          [](Stats &self) { return self.get_group_size_approx(); },
-          "An approximation (due to possible overflows/rounding errors) of the"
-          " size of the automorphism group")
-      .def_prop_ro(
-          "n_nodes", [](Stats &self) { return self.get_nof_nodes(); },
-          "Number of nodes in the search tree.")
-      .def_prop_ro(
-          "n_leaf_nodes", [](Stats &self) { return self.get_nof_leaf_nodes(); },
-          "Number of leaf nodes in the search tree.")
-      .def_prop_ro(
-          "n_bad_nodes", [](Stats &self) { return self.get_nof_bad_nodes(); },
-          "Number of bad nodes in the search tree.")
-      .def_prop_ro(
-          "n_canupdates", [](Stats &self) { return self.get_nof_canupdates(); },
-          "Number of canonical representative nodes.")
-      .def_prop_ro(
-          "n_generators", [](Stats &self) { return self.get_nof_generators(); },
-          "Number of generator permutations.")
-      .def_prop_ro(
-          "max_level", [](Stats &self) { return self.get_max_level(); },
-          "The maximal depth of the search tree.")
-      .def("__str__", [](Stats &self) {
-        return capture_string_written_to_file(
-            [&](FILE *fp) { self.print(fp); });
-      });
-
-  // }}}
-
-  // {{{ Graph
-
+void bind_graph(nb::module_ &m) {
   nb::class_<Graph>(m, "Graph",
                     "Undirected vertex-colored graph.\n\n"
                     "See :class:`DiGraph` for a directed variant.")
@@ -389,16 +230,16 @@ NB_MODULE(pybliss_ext, m) {
       .def(
           "show_dot",
           [](Graph &self, nb::object output_to) {
-            nb::module_ pytools_graphviz = nb::module_::import_("pytools.graphviz");
+            nb::module_ pytools_graphviz =
+                nb::module_::import_("pytools.graphviz");
             const std::string dot_code = capture_string_written_to_file(
                 [&](FILE *fp) { self.write_dot(fp); });
-            pytools_graphviz.attr("show_dot")(nb::str(dot_code.c_str()), output_to);
+            pytools_graphviz.attr("show_dot")(nb::str(dot_code.c_str()),
+                                              output_to);
           },
           "output_to"_a = nb::none(),
           "Visualize the graph.\n\n"
           ":arg output_to:  Passed on to :func:`pytools.graphviz.show_dot` "
           "unmodified.")
       .def("__hash__", &Graph::get_hash);
-
-  // }}}
 }

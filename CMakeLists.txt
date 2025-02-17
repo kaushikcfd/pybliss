@@ -36,11 +36,16 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code:
-  src/pybliss_ext.cpp
+  src/pybliss_ext.cc
+  src/bindings/stats.cc
+  src/bindings/bignum.cc
+  src/bindings/graph.cc
+  src/bindings/utils.cc
   ${BLISS_SOURCE_FILES}
 )
 
 target_include_directories(pybliss_ext PRIVATE src/Bliss/include)
+target_include_directories(pybliss_ext PRIVATE src/)
 
 # Install directive for scikit-build-core
 install(TARGETS pybliss_ext LIBRARY DESTINATION pybliss)
