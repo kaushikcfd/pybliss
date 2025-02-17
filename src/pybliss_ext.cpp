@@ -112,13 +112,11 @@ NB_MODULE(pybliss_ext, m) {
              FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
              self.print(fp);
            })
-      .def("__str__",
-           [](Stats &self) {
-             return capture_string_written_to_file(
-                 [&](FILE *fp) { self.print(fp); });
-           }
-           // FIXME: Add a to_python method.
-      );
+      // FIXME: Add a to_python method.
+      .def("__str__", [](Stats &self) {
+        return capture_string_written_to_file(
+            [&](FILE *fp) { self.print(fp); });
+      });
 
   // }}}
 
@@ -377,6 +375,10 @@ NB_MODULE(pybliss_ext, m) {
           "Write the graph to *fp* in the graphviz format.\n\n"
           ":arg fp: The file stream where the graph is to be written.")
       .def("copy", &Graph::copy, "Returns a copy of this graph.")
+      .def("cmp", &Graph::cmp, "other"_a,
+           "Compare this graph to *other* in a total order on graphs. Returns "
+           "0 if graphs are equal, -1 if this graph is \"smaller than\" the "
+           "other, and 1 if this graph is \"greater than\" *other*.")
       .def("__hash__", &Graph::get_hash);
 
   // }}}
