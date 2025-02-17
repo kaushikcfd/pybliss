@@ -1,4 +1,6 @@
 #include <bliss/graph.hh>
+#include <bliss/stats.hh>
+#include <memory>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 
@@ -8,7 +10,7 @@ using namespace nb::literals;
 using namespace bliss;
 
 namespace {
-void _perform_sanity_checks_on_perm_array(
+void perform_sanity_checks_on_perm_array(
     const nb::ndarray<uint32_t, nb::ndim<1>> &ary, size_t reqd_size) {
 
   // Ensure the array is contiguous and has uint32_t dtype
@@ -21,12 +23,99 @@ void _perform_sanity_checks_on_perm_array(
         "vertices in the graph.");
   }
 }
+
+FILE *get_fp_from_writeable_pyobj(nb::object file_obj) {
+  // Check if the object is None (indicating no file)
+  if (file_obj.is_none()) {
+    throw std::runtime_error("File object is None");
+  }
+
+  // Check if the object has a 'fileno' method
+  if (!nb::hasattr(file_obj, "fileno")) {
+    throw std::runtime_error(
+        "Expected a file-like object with a 'fileno' method");
+  }
+
+  // Check if the object is writable
+  if (!nb::hasattr(file_obj, "write")) {
+    throw std::runtime_error(
+        "File object is not writable (missing 'write' method)");
+  }
+  return nb::cast<FILE *>(file_obj.attr("fileno")());
+}
+
+std::string
+capture_string_written_to_file(std::function<void(FILE *)> file_writer) {
+  // unique_ptr to ensure FILE* is properly closed
+  std::unique_ptr<FILE, decltype(&fclose)> fp(tmpfile(), fclose);
+  if (!fp) {
+    throw std::runtime_error("Failed to create temporary file.");
+  }
+
+  file_writer(fp.get());
+  fflush(fp.get()); // Ensure all output is written
+
+  // Get file size
+  if (fseek(fp.get(), 0, SEEK_END) != 0) {
+    throw std::runtime_error("Failed to seek to end of file.");
+  }
+  long size = ftell(fp.get());
+  if (size == -1L) {
+    throw std::runtime_error("Failed to determine file size.");
+  }
+  rewind(fp.get()); // Go back to the beginning
+
+  // Read the content into a string
+  std::string output(size, '\0');
+  fread(&output[0], 1, size, fp.get());
+
+  return output;
+}
+
 } // namespace
 
 NB_MODULE(pybliss_ext, m) {
   m.doc() = "Wrapper for BLISS-toolkit for graph canonicalization.";
   m.def(
       "add", [](int a, int b) { return a + b; }, "a"_a, "b"_a);
+
+  nb::class_<Stats>(m, "Stats")
+      .def(nb::init<>())
+      .def("print_to_file",
+           [](Stats &self, nb::object fp_obj) {
+             FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
+             self.print(fp);
+           })
+      .def_prop_ro(
+          "group_size", [](Stats &self) { return self.get_group_size(); },
+          "The size of the automorphism group.")
+      .def_prop_ro(
+          "group_size_approx",
+          [](Stats &self) { return self.get_group_size_approx(); },
+          "An approximation (due to possible overflows/rounding errors) of the"
+          " size of the automorphism group")
+      .def_prop_ro(
+          "n_nodes", [](Stats &self) { return self.get_nof_nodes(); },
+          "Number of nodes in the search tree.")
+      .def_prop_ro(
+          "n_leaf_nodes", [](Stats &self) { return self.get_nof_leaf_nodes(); },
+          "Number of leaf nodes in the search tree.")
+      .def_prop_ro(
+          "n_bad_nodes", [](Stats &self) { return self.get_nof_bad_nodes(); },
+          "Number of bad nodes in the search tree.")
+      .def_prop_ro(
+          "n_canupdates", [](Stats &self) { return self.get_nof_canupdates(); },
+          "Number of canonical representative nodes.")
+      .def_prop_ro(
+          "n_generators", [](Stats &self) { return self.get_nof_generators(); },
+          "Number of generator permutations.")
+      .def_prop_ro(
+          "max_level", [](Stats &self) { return self.get_max_level(); },
+          "The maximal depth of the search tree.")
+      .def("__str__", [](Stats &self) {
+        return capture_string_written_to_file(
+            [&](FILE *fp) { self.print(fp); });
+      });
 
   nb::class_<Graph>(m, "Graph")
       .def(nb::init<>())
@@ -41,21 +130,7 @@ NB_MODULE(pybliss_ext, m) {
             if (fp_obj.is_none()) {
               self.set_verbose_file(nullptr);
             } else {
-              // Check if the object has a 'fileno' method (i.e., it's a
-              // file-like object)
-              if (!nb::hasattr(fp_obj, "fileno")) {
-                throw std::runtime_error(
-                    "Expected a file-like object with a 'fileno' method");
-              }
-
-              // Extract the FILE* from the Python object
-              int fd = nb::cast<int>(fp_obj.attr("fileno")());
-              FILE *fp =
-                  fdopen(fd, "w"); // Open a FILE* from the file descriptor
-              if (!fp) {
-                throw std::runtime_error(
-                    "Failed to open FILE* from file descriptor");
-              }
+              FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
               self.set_verbose_file(fp);
             }
           },
@@ -92,7 +167,7 @@ NB_MODULE(pybliss_ext, m) {
       .def(
           "permute",
           [](Graph &self, const nb::ndarray<uint32_t, nb::ndim<1>> &ary) {
-            _perform_sanity_checks_on_perm_array(ary, self.get_nof_vertices());
+            perform_sanity_checks_on_perm_array(ary, self.get_nof_vertices());
             return self.permute((uint32_t *)ary.data());
           },
           "perm"_a,
@@ -103,7 +178,7 @@ NB_MODULE(pybliss_ext, m) {
       .def(
           "is_automorphism",
           [](Graph &self, const nb::ndarray<uint32_t, nb::ndim<1>> &ary) {
-            _perform_sanity_checks_on_perm_array(ary, self.get_nof_vertices());
+            perform_sanity_checks_on_perm_array(ary, self.get_nof_vertices());
             return self.is_automorphism((uint32_t *)ary.data());
           },
           "perm"_a,
