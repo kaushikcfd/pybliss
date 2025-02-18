@@ -2,6 +2,9 @@
 #include <bliss/stats.hh>
 #include <cstring>
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/optional.h>
+#include <optional>
 #include <pybliss_ext.h>
 
 using namespace bliss;
@@ -80,10 +83,10 @@ void bind_graph(nb::module_ &m) {
       .def(
           "find_automorphisms",
           [](Graph &self, Stats &stats,
-             const std::function<void(
+             std::optional<const std::function<void(
                  int, nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
-                                  nb::c_contig>)> &py_report = nullptr,
-             const std::function<bool()> &py_terminate = nullptr) {
+                                  nb::c_contig>)>>& py_report,
+             std::optional<const std::function<bool()>>& py_terminate) {
             std::function<void(unsigned int, const unsigned int *)> cpp_report =
                 nullptr;
             std::function<bool()> cpp_terminate = nullptr;
@@ -93,12 +96,12 @@ void bind_graph(nb::module_ &m) {
                 auto np_aut =
                     nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
                                 nb::c_contig>(aut, {self.get_nof_vertices()});
-                py_report(n, np_aut);
+                (*py_report)(n, np_aut);
               };
             }
 
             if (py_terminate) {
-              cpp_terminate = [&]() { return py_terminate(); };
+              cpp_terminate = *py_terminate;
             }
 
             self.find_automorphisms(stats, cpp_report, cpp_terminate);
@@ -110,7 +113,9 @@ void bind_graph(nb::module_ &m) {
           "*n* for the function is the length of the automorphism (equal to "
           "get_nof_vertices()), and the second argument *aut* is the "
           "automorphism (a bijection on {0,...,nvertices-1}). *aut* is a "
-          "read-only :class:`numpy.ndarray`. Do not call any member functions "
+          "read-only :class:`numpy.ndarray`. Additionally *aut*'s entries are"
+          " invalidated across calls to *terminate*. Caller must copy *aut* if"
+          " long-term usage is intended. Do not call any member functions "
           "from the *report* function.\n\n"
 
           "The search statistics are copied in *stats*.\n\n"
@@ -125,10 +130,10 @@ void bind_graph(nb::module_ &m) {
       .def(
           "get_permutation_to_canonical_form",
           [](Graph &self, Stats &stats,
-             const std::function<void(
+             std::optional<const std::function<void(
                  int, nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
-                                  nb::c_contig>)> &py_report = nullptr,
-             const std::function<bool()> &py_terminate = nullptr) {
+                                  nb::c_contig>)>>& py_report,
+             std::optional<const std::function<bool()>>& py_terminate) {
             std::function<void(unsigned int, const unsigned int *)> cpp_report =
                 nullptr;
             std::function<bool()> cpp_terminate = nullptr;
@@ -138,12 +143,12 @@ void bind_graph(nb::module_ &m) {
                 auto np_aut =
                     nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
                                 nb::c_contig>(aut, {self.get_nof_vertices()});
-                py_report(n, np_aut);
+                (*py_report)(n, np_aut);
               };
             }
 
             if (py_terminate) {
-              cpp_terminate = py_terminate;
+              cpp_terminate = *py_terminate;
             }
 
             auto perm = self.canonical_form(stats, cpp_report, cpp_terminate);
@@ -162,7 +167,9 @@ void bind_graph(nb::module_ &m) {
           "first argument  *n* for the function is the length of the "
           "automorphism (equal to  get_nof_vertices()), and the second "
           "argument *aut* is the  automorphism (a bijection on "
-          "{0,...,nvertices-1}). *aut* is a read-only :class:`numpy.ndarray`."
+          "{0,...,nvertices-1}). *aut* is a read-only :class:`numpy.ndarray`. "
+          "Additionally *aut*'s entries are invalidated across calls to "
+          "*terminate*. Caller must copy *aut* if long-term usage is intended."
           " Do not call any  member functions from the *report* function.\n\n"
 
           "The search statistics are copied in *stats*.\n\n"
