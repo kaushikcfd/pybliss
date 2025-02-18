@@ -17,44 +17,57 @@ void perform_sanity_checks_on_perm_array(
   }
 }
 
-FILE *get_fp_from_writeable_pyobj(nb::object file_obj) {
-  // Check if the object is None (indicating no file)
-  if (file_obj.is_none()) {
-    throw std::runtime_error("File object is None");
-  }
-
-  // Check if the object has a 'fileno' method
-  if (!nb::hasattr(file_obj, "fileno")) {
+/**
+ * Grabs the FILE* from \p py_file for writing into the file-descriptor
+ * pointed by \p py_file. We do not have any sane deleters associated with
+ * the returned file pointer. Caller must manage lifetime appropriately.
+ */
+FILE *get_fp_from_writeable_pyobj(nb::object py_file) {
+  if (!nb::hasattr(py_file, "fileno")) {
     throw std::runtime_error(
         "Expected a file-like object with a 'fileno' method");
   }
 
-  // Check if the object is writable
-  if (!nb::hasattr(file_obj, "write")) {
+  if (!nb::hasattr(py_file, "write")) {
     throw std::runtime_error(
         "File object is not writable (missing 'write' method)");
   }
-  return nb::cast<FILE *>(file_obj.attr("fileno")());
+  py_file.attr("flush")(); // Flush any existing buffers.
+
+  int fd = nb::cast<int>(py_file.attr("fileno")());
+  FILE *file = fdopen(fd, "w");
+  if (!file) {
+    throw std::runtime_error("Failed to convert file descriptor to FILE*");
+  }
+  return file;
 }
 
-FILE *get_fp_from_readable_pyobj(nb::object file_obj) {
-  // Check if the object is None (indicating no file)
-  if (file_obj.is_none()) {
-    throw std::runtime_error("File object is None");
-  }
-
+/**
+ * Grabs the FILE* from \p py_file for reading from the file-descriptor
+ * pointed by \p py_file. The returned file-pointer is seeked up to the
+ * point where the python IOReader has read. We do not have any sane
+ * deleters associated with the returned file pointer. Caller must manage
+ * lifetime appropriately.
+ */
+FILE *get_fp_from_readable_pyobj(nb::object py_file) {
   // Check if the object has a 'fileno' method
-  if (!nb::hasattr(file_obj, "fileno")) {
+  if (!nb::hasattr(py_file, "fileno")) {
     throw std::runtime_error(
         "Expected a file-like object with a 'fileno' method");
   }
 
   // Check if the object is writable
-  if (!nb::hasattr(file_obj, "read")) {
+  if (!nb::hasattr(py_file, "read")) {
     throw std::runtime_error(
         "File object is not readable (missing 'read' method)");
   }
-  return nb::cast<FILE *>(file_obj.attr("fileno")());
+  int fd = nb::cast<int>(py_file.attr("fileno")());
+  FILE *file = fdopen(fd, "r");
+  if (!file) {
+    throw std::runtime_error("Failed to convert file descriptor to FILE*");
+  }
+  fseek(file, nb::cast<long int>(py_file.attr("tell")()), SEEK_SET);
+  return file;
 }
 
 std::string
@@ -93,6 +106,7 @@ void bind_utils(nb::module_ &m) {
         FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
         bliss::print_permutation(fp, ary.shape(0), (uint32_t *)ary.data(),
                                  offset);
+        fflush(fp);
       },
       "fp"_a, "perm"_a, "offset"_a = 0,
       "Print the permutation in the cycle format in the file stream *fp*. The "

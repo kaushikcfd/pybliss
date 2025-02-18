@@ -14,6 +14,7 @@ void bind_stats(nb::module_ &m) {
            [](Stats &self, nb::object fp_obj) {
              FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
              self.print(fp);
+             fflush(fp);
            })
       .def_prop_ro(
           "group_size", [](Stats &self) { return self.get_group_size(); },

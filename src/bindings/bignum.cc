@@ -14,6 +14,7 @@ void bind_bignum(nb::module_ &m) {
            [](BigNum &self, nb::object fp_obj) {
              FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
              self.print(fp);
+             fflush(fp);
            })
       // FIXME: Add a to_python method.
       .def("__str__", [](BigNum &self) {

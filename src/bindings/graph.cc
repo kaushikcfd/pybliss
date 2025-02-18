@@ -30,7 +30,7 @@ void bind_graph(nb::module_ &m) {
           self.set_verbose_file(fp);
         }
       },
-      "fp"_a,
+      nb::keep_alive<1, 2>(), "fp"_a,
       "Set the file stream for verbose output.\n\n"
       ":param file_obj: The file object to write the output to. If None, "
       "writing to the file is disabled.");
@@ -186,7 +186,7 @@ void bind_graph(nb::module_ &m) {
   graph.def_static(
       "from_dimacs",
       [](nb::object file_obj) {
-        FILE *fp = get_fp_from_writeable_pyobj(file_obj);
+        FILE *fp = get_fp_from_readable_pyobj(file_obj);
         Graph *ptr = nullptr;
         auto err_str = capture_string_written_to_file([&](FILE *err_stream) {
           ptr = Graph::read_dimacs(fp, err_stream);
@@ -210,6 +210,7 @@ void bind_graph(nb::module_ &m) {
       [](Graph &self, nb::object file_obj) {
         FILE *fp = get_fp_from_writeable_pyobj(file_obj);
         self.write_dimacs(fp);
+        fflush(fp);
       },
       "fp"_a,
       "Write the graph to *fp* in a variant of the DIMACS format. See the "
@@ -224,6 +225,7 @@ void bind_graph(nb::module_ &m) {
       [](Graph &self, nb::object file_obj) {
         FILE *fp = get_fp_from_writeable_pyobj(file_obj);
         self.write_dot(fp);
+        fflush(fp);
       },
       "fp"_a,
       "Write the graph to *fp* in the graphviz format.\n\n"
