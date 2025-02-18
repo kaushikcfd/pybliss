@@ -17,7 +17,8 @@ void bind_bignum(nb::module_ &m) {
            })
       // FIXME: Add a to_python method.
       .def("__str__", [](BigNum &self) {
-        return capture_string_written_to_file(
-            [&](FILE *fp) { self.print(fp); });
+        return nb::str(capture_string_written_to_file([&](FILE *fp) {
+                         self.print(fp);
+                       }).c_str());
       });
 }

@@ -42,7 +42,8 @@ void bind_stats(nb::module_ &m) {
           "max_level", [](Stats &self) { return self.get_max_level(); },
           "The maximal depth of the search tree.")
       .def("__str__", [](Stats &self) {
-        return capture_string_written_to_file(
-            [&](FILE *fp) { self.print(fp); });
+        return nb::str(capture_string_written_to_file([&](FILE *fp) {
+                         self.print(fp);
+                       }).c_str());
       });
 }
