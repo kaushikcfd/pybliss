@@ -1,5 +1,6 @@
 import pybliss as bliss
 
 
-def test_add():
-    assert bliss.add(1, 2) == 3
+def test_create_graph():
+    g = bliss.Graph(42)
+    assert g.nvertices == 42
