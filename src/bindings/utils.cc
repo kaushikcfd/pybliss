@@ -1,4 +1,5 @@
 #include "pybliss_ext.h"
+#include <bliss/utils.hh>
 #include <memory>
 #include <nanobind/nanobind.h>
 
@@ -82,4 +83,36 @@ capture_string_written_to_file(std::function<void(FILE *)> file_writer) {
   fread(&output[0], 1, size, fp.get());
 
   return output;
+}
+
+void bind_utils(nb::module_ &m) {
+  m.def(
+      "print_permutation_to_file",
+      [](nb::object fp_obj, const nb::ndarray<uint32_t, nb::ndim<1>> &ary,
+         uint32_t offset) {
+        FILE *fp = get_fp_from_writeable_pyobj(fp_obj);
+        bliss::print_permutation(fp, ary.shape(0), (uint32_t *)ary.data(),
+                                 offset);
+      },
+      "fp"_a, "perm"_a, "offset"_a = 0,
+      "Print the permutation in the cycle format in the file stream *fp*. The "
+      "amount *offset* is added to each element before printing, e.g. the "
+      "permutation (2 4) is printed as (3 5) when *offset* is 1. Wraps "
+      "``print_permutation`` from the C++-API. Also see "
+      ":func:`permutation_to_str`.");
+
+  m.def(
+      "permutation_to_str",
+      [](const nb::ndarray<uint32_t, nb::ndim<1>> &ary, uint32_t offset) {
+        auto perm_str = capture_string_written_to_file([&](FILE *fp) {
+          bliss::print_permutation(fp, ary.shape(0), (uint32_t *)ary.data(),
+                                   offset);
+        });
+        return nb::str(perm_str.c_str());
+      },
+      "perm"_a, "offset"_a = 0,
+      "Returns a :class:`str` corresponding to the permutation *perm* in cycle "
+      "format. The amount *offset* is added to each element before "
+      "stringifying, e.g. the permutation (2 4) is printed as (3 5) when "
+      "*offset* is 1. Also see :func:`print_permutation_to_file`.");
 }

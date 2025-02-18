@@ -7,4 +7,5 @@ NB_MODULE(pybliss_ext, m) {
   bind_bignum(m);
   bind_stats(m);
   bind_graph(m);
+  bind_utils(m);
 }
