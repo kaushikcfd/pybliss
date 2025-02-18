@@ -10,11 +10,11 @@
 using namespace bliss;
 
 void bind_graph(nb::module_ &m) {
-  nb::class_<Graph>(m, "Graph",
-                    "Undirected vertex-colored graph.\n\n"
-                    "See :class:`DiGraph` for a directed variant.")
-      .def(nb::init<>())
-      .def(nb::init<unsigned int>())
+  nb::class_<Graph> graph(m, "Graph",
+                          "Undirected vertex-colored graph.\n\n"
+                          "See :class:`DiGraph` for a directed variant.");
+  graph.def(nb::init<>())
+                .def(nb::init<unsigned int>())
       .def(
           "set_verbose_level", &Graph::set_verbose_level, "level"_a,
           "Set the verbose output level for the algorithms\n"
@@ -248,5 +248,48 @@ void bind_graph(nb::module_ &m) {
           "Visualize the graph.\n\n"
           ":arg output_to:  Passed on to :func:`pytools.graphviz.show_dot` "
           "unmodified.")
-      .def("__hash__", &Graph::get_hash);
+      .def("__hash__", &Graph::get_hash)
+      .def("set_long_prune_activity", &Graph::set_long_prune_activity, "active"_a,
+           "Disable/enable the long prune method. The choice affects the computed "
+           "canonical labelings. Therefore, if you want to compare whether two graphs are "
+           "isomorphic by computing and comparing (for equality) their canonical "
+           "versions, be sure to use the same choice for both graphs. May not be called "
+           "during the search, i.e. from an automorphism reporting hook function. "
+           "*active*  if true, activate long prune, deactivate otherwise")
+      .def("set_splitting_heuristic", &Graph::set_splitting_heuristic,
+           "shs"_a,
+           "Set the splitting heuristic used by the automorphism and canonical labeling "
+           "algorithm. The selected splitting heuristics affects the computed canonical "
+           "labelings. Therefore, if you want to compare whether two graphs are "
+           "isomorphic by computing and comparing (for equality) their canonical "
+           "versions, be sure to use the same splitting heuristics for both graphs.");
+
+  nb::enum_<Graph::SplittingHeuristic>(
+      graph, "SplittingHeuristic",
+      "Enum defining the splitting heuristics for graph canonicalization.")
+      .value("shs_f", Graph::SplittingHeuristic::shs_f,
+             "First non-unit cell. Very fast but may result in large search "
+             "spaces on difficult graphs. Use for large but easy graphs.")
+      .value(
+          "shs_fs", Graph::SplittingHeuristic::shs_fs,
+          "First smallest non-unit cell. Fast, should usually produce smaller "
+          "search spaces than shs_f.")
+      .value(
+          "shs_fl", Graph::SplittingHeuristic::shs_fl,
+          "First largest non-unit cell. Fast, should usually produce smaller "
+          "search spaces than shs_f.")
+      .value("shs_fm", Graph::SplittingHeuristic::shs_fm,
+             "First maximally non-trivially connected non-unit cell. Not so "
+             "fast, should usually produce smaller search spaces than shs_f, "
+             "shs_fs, and shs_fl.")
+      .value("shs_fsm", Graph::SplittingHeuristic::shs_fsm,
+             "First smallest maximally non-trivially connected non-unit cell. "
+             "Not so fast, should usually produce smaller search spaces than "
+             "shs_f, shs_fs, and shs_fl.")
+      .value(
+          "shs_flm", Graph::SplittingHeuristic::shs_flm,
+          "First largest maximally non-trivially connected non-unit cell. Not "
+          "so fast, should usually produce smaller search spaces than shs_f, "
+          "shs_fs, and shs_fl.")
+      .export_values();
 }
