@@ -23,6 +23,9 @@ jobs:
 
       - name: Create test-conda-env, install pybliss
         run: |
+          conda init bash
+          conda config --set auto_activate_base false
+          source ~/.bashrc
           conda env create -f .test-conda-env.yml
           conda activate test-conda-env
           pip install .
