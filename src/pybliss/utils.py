@@ -1,4 +1,4 @@
-from .pybliss_ext import print_permutation_to_file, permutation_to_str
+from .pybliss_ext import permutation_to_str, print_permutation_to_file
 
 __doc__ = """
 .. autofunction:: permutation_to_str

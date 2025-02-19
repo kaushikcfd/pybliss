@@ -1,11 +1,11 @@
-from .pybliss_ext import __doc__, BigNum, Graph, Stats
 import pybliss.utils as utils
 
+from .pybliss_ext import BigNum, Graph, Stats, __doc__
 
 __all__ = [
-    "__doc__",
     "BigNum",
     "Graph",
     "Stats",
+    "__doc__",
     "utils",
 ]

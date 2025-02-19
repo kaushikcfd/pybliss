@@ -8,6 +8,28 @@ on:
         - cron:  '17 3 * * 0'
 
 jobs:
+  ruff:
+    name: Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Run ruff-check
+        run: |
+          pip install ruff
+          ruff check
+
+  clang-format:
+    name: Clang format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+          find . -name '*.cc' -exec clang-format --dry-run --Werror {} +
+
   build-docs:
     name: Check Documentation
     runs-on: ubuntu-latest
