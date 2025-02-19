@@ -20,6 +20,8 @@ jobs:
         with:
           python-version: "3"
           auto-update-conda: true
+
+      - name: Create test-conda-env, install pybliss
         run: |
           conda env create -f .test-conda-env.yml
           conda activate test-conda-env
