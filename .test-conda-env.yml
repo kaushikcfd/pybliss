@@ -7,6 +7,7 @@ dependencies:
 - pandoc
 - numpy
 - cmake
+- sphinx
 - pip:
   - "nanobind"
   - "scikit-build-core[pyproject]"
@@ -17,3 +18,4 @@ dependencies:
   - "IPython"
   - "ipykernel"
   - "jupyter"
+  - "nbsphinx"
