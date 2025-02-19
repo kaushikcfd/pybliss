@@ -10,6 +10,7 @@ dependencies:
 - sphinx
 - pip:
   - "nanobind"
+  - "pytest"
   - "scikit-build-core[pyproject]"
   - "sphinx-math-dollar"
   - "pytools"
