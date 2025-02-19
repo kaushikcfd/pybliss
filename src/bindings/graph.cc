@@ -10,31 +10,31 @@
 using namespace bliss;
 
 void bind_graph(nb::module_ &m) {
-  nb::class_<Graph> graph(m, "Graph",
-                          "Undirected vertex-colored graph.\n\n"
-                          "See :class:`DiGraph` for a directed variant.\n\n"
-                          ".. automethod:: __init__\n"
-                          ".. automethod:: set_verbose_level\n"
-                          ".. automethod:: set_verbose_file\n"
-                          ".. automethod:: add_vertex\n"
-                          ".. automethod:: add_edge\n"
-                          ".. automethod:: get_color\n"
-                          ".. automethod:: change_color\n"
-                          ".. automethod:: set_failure_recording\n"
-                          ".. automethod:: set_component_recursion\n"
-                          ".. autoattribute:: nvertices\n"
-                          ".. automethod:: permute\n"
-                          ".. automethod:: is_automorphism\n"
-                          ".. automethod:: find_automorphisms\n"
-                          ".. automethod:: get_permutation_to_canonical_form\n"
-                          ".. automethod:: write_dimacs\n"
-                          ".. automethod:: write_dot\n"
-                          ".. automethod:: show_dot\n"
-                          ".. automethod:: from_dimacs\n"
-                          ".. automethod:: copy\n"
-                          ".. automethod:: cmp\n"
-                          ".. automethod:: set_long_prune_activity\n"
-                          ".. automethod:: set_splitting_heuristic\n");
+  nb::class_<Graph> graph(m, "Graph", R"(
+                          Undirected vertex-colored graph. See ``DiGraph`` for a directed variant.
+
+                          .. automethod:: __init__
+                          .. automethod:: set_verbose_level
+                          .. automethod:: set_verbose_file
+                          .. automethod:: add_vertex
+                          .. automethod:: add_edge
+                          .. automethod:: get_color
+                          .. automethod:: change_color
+                          .. automethod:: set_failure_recording
+                          .. automethod:: set_component_recursion
+                          .. autoattribute:: nvertices
+                          .. automethod:: permute
+                          .. automethod:: is_automorphism
+                          .. automethod:: find_automorphisms
+                          .. automethod:: get_permutation_to_canonical_form
+                          .. automethod:: write_dimacs
+                          .. automethod:: write_dot
+                          .. automethod:: show_dot
+                          .. automethod:: from_dimacs
+                          .. automethod:: copy
+                          .. automethod:: cmp
+                          .. automethod:: set_long_prune_activity
+                          .. automethod:: set_splitting_heuristic)");
   graph.def(nb::init<>());
   graph.def(nb::init<unsigned int>());
   graph.def(
@@ -287,30 +287,41 @@ void bind_graph(nb::module_ &m) {
             "comparing (for equality) their canonical versions, be sure to use "
             "the same splitting heuristics for both graphs.");
 
-  nb::enum_<Graph::SplittingHeuristic>(
-      graph, "SplittingHeuristic",
-      "Enum defining the splitting heuristics for graph canonicalization.\n\n"
-      ".. attribute:: shs_f\n\n"
-      "First non-unit cell. Very fast but may result in large search "
-      "spaces on difficult graphs. Use for large but easy graphs.\n\n"
-      ".. attribute:: shs_fs\n\n"
-      "First smallest non-unit cell. Fast, should usually produce smaller "
-      "search spaces than shs_f.\n\n"
-      ".. attribute:: shs_fl\n\n"
-      "First largest non-unit cell. Fast, should usually produce smaller "
-      "search spaces than shs_f.\n\n"
-      ".. attribute:: shs_fm\n\n"
-      "First maximally non-trivially connected non-unit cell. Not so "
-      "fast, should usually produce smaller search spaces than shs_f, "
-      "shs_fs, and shs_fl.\n\n"
-      ".. attribute:: shs_fsm\n"
-      "First smallest maximally non-trivially connected non-unit cell. "
-      "Not so fast, should usually produce smaller search spaces than "
-      "shs_f, shs_fs, and shs_fl.\n\n"
-      ".. attribute:: shs_flm\n\n"
-      "First largest maximally non-trivially connected non-unit cell. Not "
-      "so fast, should usually produce smaller search spaces than shs_f, "
-      "shs_fs, and shs_fl.\n")
+  nb::enum_<Graph::SplittingHeuristic>(graph, "SplittingHeuristic", R"(
+      Enum defining the splitting heuristics for graph canonicalization.
+
+      .. attribute:: shs_f
+
+        First non-unit cell. Very fast but may result in large search
+        spaces on difficult graphs. Use for large but easy graphs.
+
+      .. attribute:: shs_fs
+
+        First smallest non-unit cell. Fast, should usually produce smaller
+        search spaces than shs_f.
+
+      .. attribute:: shs_fl
+
+        First largest non-unit cell. Fast, should usually produce smaller
+        search spaces than shs_f.
+
+      .. attribute:: shs_fm
+
+        First maximally non-trivially connected non-unit cell. Not so
+        fast, should usually produce smaller search spaces than shs_f,
+        shs_fs, and shs_fl.
+
+      .. attribute:: shs_fsm
+
+        First smallest maximally non-trivially connected non-unit cell.
+        Not so fast, should usually produce smaller search spaces than
+        shs_f, shs_fs, and shs_fl.
+
+      .. attribute:: shs_flm
+
+        First largest maximally non-trivially connected non-unit cell. Not
+        so fast, should usually produce smaller search spaces than shs_f,
+        shs_fs, and shs_fl.)")
       .value("shs_f", Graph::SplittingHeuristic::shs_f)
       .value("shs_fs", Graph::SplittingHeuristic::shs_fs)
       .value("shs_fl", Graph::SplittingHeuristic::shs_fl)
