@@ -24,15 +24,12 @@ jobs:
           auto-activate-base: false
           auto-update-conda: true
 
-      - name: Create test-conda-env, install pybliss
+      - name: Create test-conda-env, install pybliss, sphinx-build
         run: |
           conda init bash
           source ~/.bashrc
           conda env create -f .test-conda-env.yml
           conda activate test-conda-env
           pip install .
-
-      - name: Sphinx Build
-        run: |
           cd docs
           make html SPHINXOPTS="-W --keep-going -n"
