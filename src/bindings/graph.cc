@@ -34,8 +34,7 @@ void bind_graph(nb::module_ &m) {
                           ".. automethod:: copy\n"
                           ".. automethod:: cmp\n"
                           ".. automethod:: set_long_prune_activity\n"
-                          ".. automethod:: set_splitting_heuristic\n"
-                          );
+                          ".. automethod:: set_splitting_heuristic\n");
   graph.def(nb::init<>());
   graph.def(nb::init<unsigned int>());
   graph.def(
@@ -290,30 +289,33 @@ void bind_graph(nb::module_ &m) {
 
   nb::enum_<Graph::SplittingHeuristic>(
       graph, "SplittingHeuristic",
-      "Enum defining the splitting heuristics for graph canonicalization.")
-      .value("shs_f", Graph::SplittingHeuristic::shs_f,
-             "First non-unit cell. Very fast but may result in large search "
-             "spaces on difficult graphs. Use for large but easy graphs.")
-      .value(
-          "shs_fs", Graph::SplittingHeuristic::shs_fs,
-          "First smallest non-unit cell. Fast, should usually produce smaller "
-          "search spaces than shs_f.")
-      .value(
-          "shs_fl", Graph::SplittingHeuristic::shs_fl,
-          "First largest non-unit cell. Fast, should usually produce smaller "
-          "search spaces than shs_f.")
-      .value("shs_fm", Graph::SplittingHeuristic::shs_fm,
-             "First maximally non-trivially connected non-unit cell. Not so "
-             "fast, should usually produce smaller search spaces than shs_f, "
-             "shs_fs, and shs_fl.")
-      .value("shs_fsm", Graph::SplittingHeuristic::shs_fsm,
-             "First smallest maximally non-trivially connected non-unit cell. "
-             "Not so fast, should usually produce smaller search spaces than "
-             "shs_f, shs_fs, and shs_fl.")
-      .value(
-          "shs_flm", Graph::SplittingHeuristic::shs_flm,
-          "First largest maximally non-trivially connected non-unit cell. Not "
-          "so fast, should usually produce smaller search spaces than shs_f, "
-          "shs_fs, and shs_fl.")
+      "Enum defining the splitting heuristics for graph canonicalization.\n\n"
+      ".. attribute:: shs_f\n\n"
+      "First non-unit cell. Very fast but may result in large search "
+      "spaces on difficult graphs. Use for large but easy graphs.\n\n"
+      ".. attribute:: shs_fs\n\n"
+      "First smallest non-unit cell. Fast, should usually produce smaller "
+      "search spaces than shs_f.\n\n"
+      ".. attribute:: shs_fl\n\n"
+      "First largest non-unit cell. Fast, should usually produce smaller "
+      "search spaces than shs_f.\n\n"
+      ".. attribute:: shs_fm\n\n"
+      "First maximally non-trivially connected non-unit cell. Not so "
+      "fast, should usually produce smaller search spaces than shs_f, "
+      "shs_fs, and shs_fl.\n\n"
+      ".. attribute:: shs_fsm\n"
+      "First smallest maximally non-trivially connected non-unit cell. "
+      "Not so fast, should usually produce smaller search spaces than "
+      "shs_f, shs_fs, and shs_fl.\n\n"
+      ".. attribute:: shs_flm\n\n"
+      "First largest maximally non-trivially connected non-unit cell. Not "
+      "so fast, should usually produce smaller search spaces than shs_f, "
+      "shs_fs, and shs_fl.\n")
+      .value("shs_f", Graph::SplittingHeuristic::shs_f)
+      .value("shs_fs", Graph::SplittingHeuristic::shs_fs)
+      .value("shs_fl", Graph::SplittingHeuristic::shs_fl)
+      .value("shs_fm", Graph::SplittingHeuristic::shs_fm)
+      .value("shs_fsm", Graph::SplittingHeuristic::shs_fsm)
+      .value("shs_flm", Graph::SplittingHeuristic::shs_flm)
       .export_values();
 }
