@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    pull_request:
+      schedule:
+        - cron:  '17 3 * * 0'
+
+jobs:
+  build-docs:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: "3"
+          auto-update-conda: true
+        run: |
+          conda env create -f .test-conda-env.yml
+          conda activate test-conda-env
+          pip install .
+
+      - name: Sphinx Build
+        run: |
+          cd docs
+          make html SPHINXOPTS="-W --keep-going -n"
