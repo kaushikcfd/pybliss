@@ -6,7 +6,12 @@ using namespace bliss;
 
 void bind_bignum(nb::module_ &m) {
   nb::class_<BigNum>(m, "BigNum",
-                     "A wrapper class for non-negative big integers.")
+                     "A wrapper class for non-negative big integers.\n\n"
+                     ".. automethod:: __init__\n"
+                     ".. automethod:: assign\n"
+                     ".. automethod:: multiply\n"
+                     ".. automethod:: print_to_file\n"
+                     ".. automethod:: __str__")
       .def(nb::init<>())
       .def("assign", &BigNum::assign)
       .def("multiply", &BigNum::multiply)

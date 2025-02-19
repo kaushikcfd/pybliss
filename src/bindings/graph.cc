@@ -12,7 +12,30 @@ using namespace bliss;
 void bind_graph(nb::module_ &m) {
   nb::class_<Graph> graph(m, "Graph",
                           "Undirected vertex-colored graph.\n\n"
-                          "See :class:`DiGraph` for a directed variant.");
+                          "See :class:`DiGraph` for a directed variant.\n\n"
+                          ".. automethod:: __init__\n"
+                          ".. automethod:: set_verbose_level\n"
+                          ".. automethod:: set_verbose_file\n"
+                          ".. automethod:: add_vertex\n"
+                          ".. automethod:: add_edge\n"
+                          ".. automethod:: get_color\n"
+                          ".. automethod:: change_color\n"
+                          ".. automethod:: set_failure_recording\n"
+                          ".. automethod:: set_component_recursion\n"
+                          ".. autoattribute:: nvertices\n"
+                          ".. automethod:: permute\n"
+                          ".. automethod:: is_automorphism\n"
+                          ".. automethod:: find_automorphisms\n"
+                          ".. automethod:: get_permutation_to_canonical_form\n"
+                          ".. automethod:: write_dimacs\n"
+                          ".. automethod:: write_dot\n"
+                          ".. automethod:: show_dot\n"
+                          ".. automethod:: from_dimacs\n"
+                          ".. automethod:: copy\n"
+                          ".. automethod:: cmp\n"
+                          ".. automethod:: set_long_prune_activity\n"
+                          ".. automethod:: set_splitting_heuristic\n"
+                          );
   graph.def(nb::init<>());
   graph.def(nb::init<unsigned int>());
   graph.def(
@@ -36,7 +59,7 @@ void bind_graph(nb::module_ &m) {
       "writing to the file is disabled.");
   graph.def("add_vertex", &Graph::add_vertex, "color"_a = 0,
             "Add a new vertex with color *color* and return its new index.");
-  graph.def("add_edge", &Graph::add_edge, "v1"_a, "v1"_a,
+  graph.def("add_edge", &Graph::add_edge, "v1"_a, "v2"_a,
             "Add an edge between *v1* and *v2*.");
   graph.def("get_color", &Graph::get_color, "v"_a,
             "Returns the color of the vertex *v*");

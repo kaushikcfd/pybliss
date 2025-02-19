@@ -8,7 +8,18 @@ using namespace bliss;
 
 void bind_stats(nb::module_ &m) {
   nb::class_<Stats>(m, "Stats",
-                    "Records statistics returned by the search algorithms.")
+                    "Records statistics returned by the search algorithms.\n\n"
+                    ".. automethod:: __init__\n"
+                    ".. automethod:: print_to_file\n"
+                    ".. autoattribute:: group_size\n"
+                    ".. autoattribute:: group_size_approx\n"
+                    ".. autoattribute:: n_nodes\n"
+                    ".. autoattribute:: n_leaf_nodes\n"
+                    ".. autoattribute:: n_bad_nodes\n"
+                    ".. autoattribute:: n_canupdates\n"
+                    ".. autoattribute:: n_generators\n"
+                    ".. autoattribute:: max_level\n"
+                    ".. automethod:: __str__")
       .def(nb::init<>())
       .def("print_to_file",
            [](Stats &self, nb::object fp_obj) {
