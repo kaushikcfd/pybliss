@@ -7,7 +7,7 @@ dependencies:
 - pandoc
 - numpy
 - cmake
-- sphinx
+- sphinx=8.1.3
 - pip:
   - "nanobind"
   - "pytest"
