@@ -51,7 +51,9 @@ skip = [
   "pp*",                # Skip all PyPy builds
   "cp3?-macosx*",       # Skip Python 3.x (x < 10) on macOS
   "cp3?-manylinux*",    # Skip CPython 3.x (x < 10) on Linux
+  "cp3?-musllinux*",    # Skip CPython 3.x (x < 10) on Linux
   "cp310-manylinux*",   # Skip CPython 3.10 (too long bcoz of numpy)
+  "cp310-musllinux*",   # Skip CPython 3.10 (too long bcoz of numpy)
   "*_i686",              # i686 does not have enough memory for LTO to complete
 ]
 
