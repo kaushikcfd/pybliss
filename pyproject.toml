@@ -9,7 +9,7 @@ description = "Python wrappers around BLISS graph canonicalization toolkit."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
-    { name = "Kaushik Kulkarni", email = "kaushikcfd@gmail.com" },
+{ name = "Kaushik Kulkarni", email = "kaushikcfd@gmail.com" },
 ]
 classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -22,10 +22,10 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-    "numpy>=1.19",
-    "pytools>=2024.0",
+  "numpy>=1.19",
+  "pytools>=2024.0",
 ]
-license = "GPL-3.0 AND LGPL-3.0"
+license = { file = "LICENSE_GPLv3.txt" }
 
 [project.urls]
 Homepage = "https://github.com/kaushikcfd/pybliss"
@@ -40,6 +40,12 @@ build-dir = "build/{wheel_tag}"
 
 # Build stable ABI wheels for CPython 3.12+
 wheel.py-api = "cp312"
+
+[tool.setuptools]
+license-files = [
+  "LICENSE_GPL_v3.txt",
+  "LICENSE_LGPL_v3.txt"
+]
 
 [tool.cibuildwheel]
 # Necessary to see build output from the actual compilation
@@ -68,20 +74,20 @@ line-length = 80
 
 [tool.ruff.lint]
 extend-select = [
-    "B",   # flake8-bugbear
-    "C",   # flake8-comprehensions
-    "E",   # pycodestyle
-    "F",   # pyflakes
+  "B",   # flake8-bugbear
+  "C",   # flake8-comprehensions
+  "E",   # pycodestyle
+  "F",   # pyflakes
 
-    "I",   # flake8-isort
+  "I",   # flake8-isort
 
-    "N",   # pep8-naming
-    "NPY", # numpy
-    "Q",   # flake8-quotes
-    "W",   # pycodestyle
+  "N",   # pep8-naming
+  "NPY", # numpy
+  "Q",   # flake8-quotes
+  "W",   # pycodestyle
 
-    "UP",  # pyupgrade
-    "RUF",  # ruff
-    "FA",
-    "TC",
+  "UP",  # pyupgrade
+  "RUF",  # ruff
+  "FA",
+  "TC",
 ]
