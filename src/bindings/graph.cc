@@ -28,7 +28,9 @@ void bind_graph(nb::module_ &m) {
                           .. automethod:: find_automorphisms
                           .. automethod:: get_permutation_to_canonical_form
                           .. automethod:: write_dimacs
+                          .. automethod:: to_dimacs
                           .. automethod:: write_dot
+                          .. automethod:: to_dot
                           .. automethod:: show_dot
                           .. automethod:: from_dimacs
                           .. automethod:: copy
@@ -243,6 +245,15 @@ void bind_graph(nb::module_ &m) {
       "API.\n\n"
       ":arg fp: The file stream where the graph is to be written.");
   graph.def(
+      "to_dimacs",
+      [](Graph &self) {
+        const std::string dimacs_code = capture_string_written_to_file(
+            [&](FILE *fp) { self.write_dimacs(fp); });
+        return nb::str(dimacs_code.c_str());
+      },
+      "Returns a :class:`str` corresponding to DIMACS format of the "
+      "graph.\n\n");
+  graph.def(
       "write_dot",
       [](Graph &self, nb::object file_obj) {
         FILE *fp = get_fp_from_writeable_pyobj(file_obj);
@@ -257,6 +268,15 @@ void bind_graph(nb::module_ &m) {
             "Compare this graph to *other* in a total order on graphs. Returns "
             "0 if graphs are equal, -1 if this graph is \"smaller than\" the "
             "other, and 1 if this graph is \"greater than\" *other*.");
+  graph.def(
+      "to_dot",
+      [](Graph &self) {
+        const std::string dot_code = capture_string_written_to_file(
+            [&](FILE *fp) { self.write_dot(fp); });
+        return nb::str(dot_code.c_str());
+      },
+      "Returns a :class:`str` corresponding to graphviz format of the "
+      "graph.\n\n");
   graph.def(
       "show_dot",
       [](Graph &self, nb::object output_to) {
