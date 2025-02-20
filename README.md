@@ -1,21 +1,6 @@
-## Python bindings for the BLISS toolkit.
+## pybliss: Python bindings for the [bliss](https://users.aalto.fi/~tjunttil/bliss/) tool.
 
-### Install
-
-`pip install .`
-
-### Develop
-
-Developers of `pybliss` can reduce build times by installing with:
-```console
-$ pip install nanobind scikit-build-core[pyproject]
-$ pip install --no-build-isolation -ve .
-```
-
-Upon any changes to the C++ files, the command: `pip install
---no-build-isolation -ve .` must be re-run.
-
-### LICENSE
-
-- Certain components of this software is licensed under GPLv3.
-- Specific libraries are under LGPLv3.
+### Links
+- Install via [`pip install pybliss`](https://pypi.org/projects/pybliss/).
+- Read the documentation at <https://pybliss.readthedocs.io>.
+- Source-code, Issue Management at  <https://github.com/kaushikcfd/pybliss>.
