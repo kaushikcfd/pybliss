@@ -49,7 +49,9 @@ test-command = "pytest {project}/tests"
 test-requires = "pytest"
 skip = [
   "pp*",                # Skip all PyPy builds
-  "cp38-macosx_arm64",  # Skip Python 3.8 on macOS/ARM64
+  "cp3?-macosx*",       # Skip Python 3.x (x < 10) on macOS
+  "cp3?-manylinux*",    # Skip CPython 3.x (x < 10) on Linux
+  "cp310-manylinux*",   # Skip CPython 3.10 (too long bcoz of numpy)
 ]
 
 # Needed for full C++17 support
