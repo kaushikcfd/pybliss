@@ -35,6 +35,7 @@ void bind_graph(nb::module_ &m) {
                           .. automethod:: from_dimacs
                           .. automethod:: copy
                           .. automethod:: cmp
+                          .. automethod:: __eq__
                           .. automethod:: set_long_prune_activity
                           .. automethod:: set_splitting_heuristic)");
   graph.def(nb::init<>());
@@ -268,6 +269,14 @@ void bind_graph(nb::module_ &m) {
             "Compare this graph to *other* in a total order on graphs. Returns "
             "0 if graphs are equal, -1 if this graph is \"smaller than\" the "
             "other, and 1 if this graph is \"greater than\" *other*.");
+  graph.def(
+      "__eq__", [](Graph &self, Graph &other) { return self.cmp(other) == 0; },
+      "other"_a,
+      R"(
+      Returns True iff this graph is identical to *other*.
+      The check is perform in :math:`O(E)`, where :math:`E` is the number
+      of edges in this graph.
+      )");
   graph.def(
       "to_dot",
       [](Graph &self) {
