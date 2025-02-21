@@ -11,6 +11,9 @@ Graph
 
 .. autoclass:: pybliss.Graph.SplittingHeuristic
 
+Digraph
+-------
+
 .. autoclass:: pybliss.Digraph
 
 .. autoclass:: pybliss.Digraph.SplittingHeuristic
@@ -27,7 +30,7 @@ BigNum
 .. autoclass:: pybliss.BigNum
 
 Utilities
------------------------
+---------
 
 .. automodule:: pybliss.utils
 
