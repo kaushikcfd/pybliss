@@ -9,6 +9,7 @@
 #include <pybliss_ext.h>
 
 using namespace bliss;
+template <typename T> inline constexpr bool always_false_v = false;
 
 template <typename GraphT>
 static inline __attribute__((always_inline)) void
@@ -76,7 +77,9 @@ bind_abstractgraph(nb::module_ &m, const char *class_name_in_python) {
     graph.def("add_edge", &GraphT::add_edge, "source"_a, "target"_a,
               "Add an edge from *source* to *target*.");
   else
-    static_assert(false, "GraphT can be either Graph or Digraph");
+    // See: https://devblogs.microsoft.com/oldnewthing/20200311-00/?p=103553
+    static_assert(always_false_v<GraphT>,
+                  "GraphT can be either Graph or Digraph");
   graph.def("get_color", &GraphT::get_color, "v"_a,
             "Returns the color of the vertex *v*");
   graph.def("change_color", &GraphT::change_color, "v"_a, "c"_a,
