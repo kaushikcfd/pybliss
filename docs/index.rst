@@ -4,7 +4,7 @@ pybliss
 
 .. module:: pybliss
 
-*pyBLISS* provides Python wrappers for the `bliss tool
+*pybliss* provides Python wrappers for the `bliss tool
 <https://users.aalto.fi/~tjunttil/bliss/>`_. Bliss relies on faster algorithms
 [bliss_2007]_, and sophisticated pruning techniques [bliss_2011]_ to accelerate
 finding automorphisms of a graph. Subsequently, it also provides tools for

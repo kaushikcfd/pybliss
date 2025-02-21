@@ -5,7 +5,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "pybliss"
 version = "2025.0"
-description = "Python wrappers around BLISS graph canonicalization toolkit."
+description = "Python wrappers around bliss graph canonicalization toolkit."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
