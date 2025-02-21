@@ -12,6 +12,7 @@ void bind_stats(nb::module_ &m) {
                     ".. automethod:: __init__\n"
                     ".. automethod:: print_to_file\n"
                     ".. autoattribute:: group_size\n"
+                    ".. autoattribute:: group_size_as_bignum\n"
                     ".. autoattribute:: group_size_approx\n"
                     ".. autoattribute:: n_nodes\n"
                     ".. autoattribute:: n_leaf_nodes\n"
@@ -28,8 +29,17 @@ void bind_stats(nb::module_ &m) {
              fflush(fp);
            })
       .def_prop_ro(
-          "group_size", [](Stats &self) { return self.get_group_size(); },
-          "The size of the automorphism group.")
+          "group_size",
+          [](Stats &self) {
+            auto grp_size_str = capture_string_written_to_file(
+                [&](FILE *fp) { self.get_group_size().print(fp); });
+            return nb::int_(nb::str(grp_size_str.c_str()));
+          },
+          "The size of the automorphism group as :class:`int`.")
+      .def_prop_ro(
+          "group_size_as_bignum",
+          [](Stats &self) { return self.get_group_size(); },
+          "The size of the automorphism group as :class:`BigNum`.")
       .def_prop_ro(
           "group_size_approx",
           [](Stats &self) { return self.get_group_size_approx(); },
