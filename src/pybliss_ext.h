@@ -22,4 +22,5 @@ capture_string_written_to_file(std::function<void(FILE *)> file_writer);
 void bind_bignum(nb::module_ &m);
 void bind_stats(nb::module_ &m);
 void bind_graph(nb::module_ &m);
+void bind_digraph(nb::module_ &m);
 void bind_utils(nb::module_ &m);

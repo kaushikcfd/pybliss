@@ -11,6 +11,10 @@ Graph
 
 .. autoclass:: pybliss.Graph.SplittingHeuristic
 
+.. autoclass:: pybliss.Digraph
+
+.. autoclass:: pybliss.Digraph.SplittingHeuristic
+
 Stats
 -----
 

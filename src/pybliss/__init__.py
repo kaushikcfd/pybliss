@@ -1,11 +1,10 @@
 import pybliss.utils as utils
 
-from .pybliss_ext import BigNum, Graph, Stats, __doc__
+from .pybliss_ext import (
+    BigNum,
+    Digraph,
+    Graph,
+    Stats,
+)
 
-__all__ = [
-    "BigNum",
-    "Graph",
-    "Stats",
-    "__doc__",
-    "utils",
-]
+__all__ = ["BigNum", "Digraph", "Graph", "Stats", "__doc__", "utils"]
