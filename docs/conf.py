@@ -11,8 +11,8 @@ html_theme_options = {
 copyright = "2025, pybliss Contributors"
 author = "pybliss Contributors"
 
-version = "2025.0"
-release = "2025.0"
+version = "2025.1"
+release = "2025.1"
 
 extensions = [
     "sphinx.ext.autodoc",
