@@ -1,3 +1,4 @@
+#include <bliss/digraph.hh>
 #include <bliss/graph.hh>
 #include <bliss/stats.hh>
 #include <cstring>
@@ -9,9 +10,11 @@
 
 using namespace bliss;
 
-void bind_graph(nb::module_ &m) {
-  nb::class_<Graph> graph(m, "Graph", R"(
-                          Undirected vertex-colored graph. See ``DiGraph`` for a directed variant.
+template <typename GraphT>
+static inline __attribute__((always_inline)) void
+bind_abstractgraph(nb::module_ &m, const char *class_name_in_python) {
+  nb::class_<GraphT> graph(m, class_name_in_python, R"(
+                          Vertex-colored graph.
 
                           .. automethod:: __init__
                           .. automethod:: set_verbose_level
@@ -37,16 +40,21 @@ void bind_graph(nb::module_ &m) {
                           .. automethod:: cmp
                           .. automethod:: __eq__
                           .. automethod:: set_long_prune_activity
-                          .. automethod:: set_splitting_heuristic)");
+                          .. automethod:: set_splitting_heuristic
+
+                        .. note::
+
+                          - :class:`Graph` represents an undirected graph, while,
+                          - :class:`Digraph` represents a directed graph.)");
   graph.def(nb::init<>());
   graph.def(nb::init<unsigned int>());
   graph.def(
-      "set_verbose_level", &Graph::set_verbose_level, "level"_a,
+      "set_verbose_level", &GraphT::set_verbose_level, "level"_a,
       "Set the verbose output level for the algorithms\n"
       ":arg level: The level of verbose output, 0 means no verbose output.");
   graph.def(
       "set_verbose_file",
-      [](Graph &self, nb::object fp_obj) {
+      [](GraphT &self, nb::object fp_obj) {
         // Check if the Python object is None (indicating a null FILE*)
         if (fp_obj.is_none()) {
           self.set_verbose_file(nullptr);
@@ -59,20 +67,26 @@ void bind_graph(nb::module_ &m) {
       "Set the file stream for verbose output.\n\n"
       ":param file_obj: The file object to write the output to. If None, "
       "writing to the file is disabled.");
-  graph.def("add_vertex", &Graph::add_vertex, "color"_a = 0,
+  graph.def("add_vertex", &GraphT::add_vertex, "color"_a = 0,
             "Add a new vertex with color *color* and return its new index.");
-  graph.def("add_edge", &Graph::add_edge, "v1"_a, "v2"_a,
-            "Add an edge between *v1* and *v2*.");
-  graph.def("get_color", &Graph::get_color, "v"_a,
+  if constexpr (std::is_same<GraphT, Graph>::value)
+    graph.def("add_edge", &GraphT::add_edge, "v1"_a, "v2"_a,
+              "Add an edge between *v1* and *v2*.");
+  else if constexpr (std::is_same<GraphT, Digraph>::value)
+    graph.def("add_edge", &GraphT::add_edge, "source"_a, "target"_a,
+              "Add an edge from *source* to *target*.");
+  else
+    static_assert(false, "GraphT can be either Graph or Digraph");
+  graph.def("get_color", &GraphT::get_color, "v"_a,
             "Returns the color of the vertex *v*");
-  graph.def("change_color", &Graph::change_color, "v"_a, "c"_a,
+  graph.def("change_color", &GraphT::change_color, "v"_a, "c"_a,
             "Change the color of vertex *v* to *c*.");
-  graph.def("set_failure_recording", &Graph::set_failure_recording, "active"_a,
+  graph.def("set_failure_recording", &GraphT::set_failure_recording, "active"_a,
             "Activate / deactivate failure recording\n\n"
             ":arg active:If true, activate failure recording, deactivate "
             "otherwise.");
   graph.def(
-      "set_component_recursion", &Graph::set_component_recursion, "active"_a,
+      "set_component_recursion", &GraphT::set_component_recursion, "active"_a,
       "Activate/deactivate component recursion. The choice affects the "
       "computed canonical labelings; therefore, if you want to compare "
       "whether two graphs are isomorphic by computing and comparing (for "
@@ -82,11 +96,11 @@ void bind_graph(nb::module_ &m) {
       ":arg active:  If true, activate component recursion, deactivate "
       "otherwise.");
   graph.def_prop_ro(
-      "nvertices", [](Graph &self) { return self.get_nof_vertices(); },
+      "nvertices", [](GraphT &self) { return self.get_nof_vertices(); },
       "Return the number of vertices in the graph.");
   graph.def(
       "permute",
-      [](Graph &self, const nb::ndarray<uint32_t, nb::ndim<1>> &ary) {
+      [](GraphT &self, const nb::ndarray<uint32_t, nb::ndim<1>> &ary) {
         perform_sanity_checks_on_perm_array(ary, self.get_nof_vertices());
         return self.permute((uint32_t *)ary.data());
       },
@@ -97,7 +111,7 @@ void bind_graph(nb::module_ &m) {
       "{0,1,...,N-1}, otherwise the result is undefined.");
   graph.def(
       "is_automorphism",
-      [](Graph &self, const nb::ndarray<uint32_t, nb::ndim<1>> &ary) {
+      [](GraphT &self, const nb::ndarray<uint32_t, nb::ndim<1>> &ary) {
         perform_sanity_checks_on_perm_array(ary, self.get_nof_vertices());
         return self.is_automorphism((uint32_t *)ary.data());
       },
@@ -107,7 +121,7 @@ void bind_graph(nb::module_ &m) {
       " bijection on {0,1,...,N-1}, otherwise the result is undefined.");
   graph.def(
       "find_automorphisms",
-      [](Graph &self, Stats &stats,
+      [](GraphT &self, Stats &stats,
          std::optional<const std::function<void(
              int, nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
                               nb::c_contig>)>> &py_report,
@@ -154,7 +168,7 @@ void bind_graph(nb::module_ &m) {
       "evaluate so that it does not consume too much time. ");
   graph.def(
       "get_permutation_to_canonical_form",
-      [](Graph &self, Stats &stats,
+      [](GraphT &self, Stats &stats,
          std::optional<const std::function<void(
              int, nb::ndarray<nb::ro, uint32_t, nb::ndim<1>, nb::numpy,
                               nb::c_contig>)>> &py_report,
@@ -207,18 +221,18 @@ void bind_graph(nb::module_ &m) {
       "available time constraints. If used, keep the function simple to "
       "evaluate so that it does not consume too much time.\n\n"
 
-      "This wraps Graph::canonical_form from the C++-API.");
+      "This wraps the method canonical_form from the C++-API.");
   graph.def_static(
       "from_dimacs",
       [](nb::object file_obj) {
         FILE *fp = get_fp_from_readable_pyobj(file_obj);
-        Graph *ptr = nullptr;
+        GraphT *ptr = nullptr;
         auto err_str = capture_string_written_to_file([&](FILE *err_stream) {
-          ptr = Graph::read_dimacs(fp, err_stream);
+          ptr = GraphT::read_dimacs(fp, err_stream);
         });
         if (!ptr) {
-          throw std::runtime_error("Error during reading Graph from DIMACS.\n" +
-                                   err_str);
+          throw std::runtime_error(
+              "Error during reading GraphT from DIMACS.\n" + err_str);
         }
         return ptr;
       },
@@ -232,7 +246,7 @@ void bind_graph(nb::module_ &m) {
       ":arg fp: The file stream from where the graph is to be read.");
   graph.def(
       "write_dimacs",
-      [](Graph &self, nb::object file_obj) {
+      [](GraphT &self, nb::object file_obj) {
         FILE *fp = get_fp_from_writeable_pyobj(file_obj);
         self.write_dimacs(fp);
         fflush(fp);
@@ -247,7 +261,7 @@ void bind_graph(nb::module_ &m) {
       ":arg fp: The file stream where the graph is to be written.");
   graph.def(
       "to_dimacs",
-      [](Graph &self) {
+      [](GraphT &self) {
         const std::string dimacs_code = capture_string_written_to_file(
             [&](FILE *fp) { self.write_dimacs(fp); });
         return nb::str(dimacs_code.c_str());
@@ -256,7 +270,7 @@ void bind_graph(nb::module_ &m) {
       "graph.\n\n");
   graph.def(
       "write_dot",
-      [](Graph &self, nb::object file_obj) {
+      [](GraphT &self, nb::object file_obj) {
         FILE *fp = get_fp_from_writeable_pyobj(file_obj);
         self.write_dot(fp);
         fflush(fp);
@@ -264,13 +278,14 @@ void bind_graph(nb::module_ &m) {
       "fp"_a,
       "Write the graph to *fp* in the graphviz format.\n\n"
       ":arg fp: The file stream where the graph is to be written.");
-  graph.def("copy", &Graph::copy, "Returns a copy of this graph.");
-  graph.def("cmp", &Graph::cmp, "other"_a,
+  graph.def("copy", &GraphT::copy, "Returns a copy of this graph.");
+  graph.def("cmp", &GraphT::cmp, "other"_a,
             "Compare this graph to *other* in a total order on graphs. Returns "
             "0 if graphs are equal, -1 if this graph is \"smaller than\" the "
             "other, and 1 if this graph is \"greater than\" *other*.");
   graph.def(
-      "__eq__", [](Graph &self, Graph &other) { return self.cmp(other) == 0; },
+      "__eq__",
+      [](GraphT &self, GraphT &other) { return self.cmp(other) == 0; },
       "other"_a,
       R"(
       Returns True iff this graph is identical to *other*.
@@ -279,7 +294,7 @@ void bind_graph(nb::module_ &m) {
       )");
   graph.def(
       "to_dot",
-      [](Graph &self) {
+      [](GraphT &self) {
         const std::string dot_code = capture_string_written_to_file(
             [&](FILE *fp) { self.write_dot(fp); });
         return nb::str(dot_code.c_str());
@@ -288,7 +303,7 @@ void bind_graph(nb::module_ &m) {
       "graph.\n\n");
   graph.def(
       "show_dot",
-      [](Graph &self, nb::object output_to) {
+      [](GraphT &self, nb::object output_to) {
         nb::module_ pytools_graphviz = nb::module_::import_("pytools.graphviz");
         const std::string dot_code = capture_string_written_to_file(
             [&](FILE *fp) { self.write_dot(fp); });
@@ -298,8 +313,8 @@ void bind_graph(nb::module_ &m) {
       "Visualize the graph.\n\n"
       ":arg output_to:  Passed on to :func:`pytools.graphviz.show_dot` "
       "unmodified.");
-  graph.def("__hash__", &Graph::get_hash);
-  graph.def("set_long_prune_activity", &Graph::set_long_prune_activity,
+  graph.def("__hash__", &GraphT::get_hash);
+  graph.def("set_long_prune_activity", &GraphT::set_long_prune_activity,
             "active"_a,
             "Disable/enable the long prune method. The choice affects the "
             "computed canonical labelings. Therefore, if you want to compare "
@@ -308,7 +323,8 @@ void bind_graph(nb::module_ &m) {
             "choice for both graphs. May not be called during the search, i.e. "
             "from an automorphism reporting hook function. *active*  if true, "
             "activate long prune, deactivate otherwise");
-  graph.def("set_splitting_heuristic", &Graph::set_splitting_heuristic, "shs"_a,
+  graph.def("set_splitting_heuristic", &GraphT::set_splitting_heuristic,
+            "shs"_a,
             "Set the splitting heuristic used by the automorphism and "
             "canonical labeling algorithm. The selected splitting heuristics "
             "affects the computed canonical labelings. Therefore, if you want "
@@ -316,7 +332,8 @@ void bind_graph(nb::module_ &m) {
             "comparing (for equality) their canonical versions, be sure to use "
             "the same splitting heuristics for both graphs.");
 
-  nb::enum_<Graph::SplittingHeuristic>(graph, "SplittingHeuristic", R"(
+  nb::enum_<typename GraphT::SplittingHeuristic>(graph, "SplittingHeuristic",
+                                                 R"(
       Enum defining the splitting heuristics for graph canonicalization.
 
       .. attribute:: shs_f
@@ -351,11 +368,15 @@ void bind_graph(nb::module_ &m) {
         First largest maximally non-trivially connected non-unit cell. Not
         so fast, should usually produce smaller search spaces than shs_f,
         shs_fs, and shs_fl.)")
-      .value("shs_f", Graph::SplittingHeuristic::shs_f)
-      .value("shs_fs", Graph::SplittingHeuristic::shs_fs)
-      .value("shs_fl", Graph::SplittingHeuristic::shs_fl)
-      .value("shs_fm", Graph::SplittingHeuristic::shs_fm)
-      .value("shs_fsm", Graph::SplittingHeuristic::shs_fsm)
-      .value("shs_flm", Graph::SplittingHeuristic::shs_flm)
+      .value("shs_f", GraphT::SplittingHeuristic::shs_f)
+      .value("shs_fs", GraphT::SplittingHeuristic::shs_fs)
+      .value("shs_fl", GraphT::SplittingHeuristic::shs_fl)
+      .value("shs_fm", GraphT::SplittingHeuristic::shs_fm)
+      .value("shs_fsm", GraphT::SplittingHeuristic::shs_fsm)
+      .value("shs_flm", GraphT::SplittingHeuristic::shs_flm)
       .export_values();
 }
+
+void bind_graph(nb::module_ &m) { bind_abstractgraph<Graph>(m, "Graph"); }
+
+void bind_digraph(nb::module_ &m) { bind_abstractgraph<Digraph>(m, "Digraph"); }
