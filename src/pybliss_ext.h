@@ -18,7 +18,7 @@ capture_string_written_to_file(std::function<void(FILE *)> file_writer);
 
 // }}}
 
-// Bind BLISS classes
+// Bind bliss classes
 void bind_bignum(nb::module_ &m);
 void bind_stats(nb::module_ &m);
 void bind_graph(nb::module_ &m);
