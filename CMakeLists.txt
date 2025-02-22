@@ -50,3 +50,15 @@ target_include_directories(pybliss_ext PRIVATE src/)
 
 # Install directive for scikit-build-core
 install(TARGETS pybliss_ext LIBRARY DESTINATION pybliss)
+
+# Generate stubs for user QoL.
+nanobind_add_stub(
+  pybliss_ext_stub
+  MODULE pybliss_ext
+  OUTPUT __init__.pyi
+  PYTHON_PATH "${CMAKE_INSTALL_PREFIX}/pybliss"
+  DEPENDS pybliss_ext
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.pyi DESTINATION pybliss)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/pybliss/py.typed DESTINATION pybliss)
