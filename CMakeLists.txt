@@ -45,6 +45,11 @@ nanobind_add_module(
   ${BLISS_SOURCE_FILES}
 )
 
+# MSVC: allow the 'and' and 'or' c++ operators used in bliss
+target_compile_options(pybliss_ext PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+)
+
 target_include_directories(pybliss_ext PRIVATE src/Bliss/include)
 target_include_directories(pybliss_ext PRIVATE src/)
 
