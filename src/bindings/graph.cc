@@ -8,11 +8,17 @@
 #include <optional>
 #include <pybliss_ext.h>
 
+#if _MSC_VER
+#define __FORCE_INLINE __forceinline
+#else
+#define __FORCE_INLINE __attribute__((always_inline))
+#endif
+
 using namespace bliss;
 template <typename T> inline constexpr bool always_false_v = false;
 
 template <typename GraphT>
-static inline __attribute__((always_inline)) void
+static inline __FORCE_INLINE void
 bind_abstractgraph(nb::module_ &m, const char *class_name_in_python) {
   nb::class_<GraphT> graph(m, class_name_in_python, R"(
                           Vertex-colored graph.

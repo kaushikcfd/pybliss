@@ -45,18 +45,30 @@ nanobind_add_module(
   ${BLISS_SOURCE_FILES}
 )
 
+# MSVC: allow the 'and' and 'or' c++ operators used in bliss
+target_compile_options(pybliss_ext PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+)
+
 target_include_directories(pybliss_ext PRIVATE src/Bliss/include)
 target_include_directories(pybliss_ext PRIVATE src/)
 
 # Install directive for scikit-build-core
 install(TARGETS pybliss_ext LIBRARY DESTINATION pybliss)
 
+# Search path for the resulting library
+if(MSVC)
+  set(PYPATH "Release")
+else()
+  set(PYPATH "${CMAKE_INSTALL_PREFIX}/pybliss")
+endif()
+
 # Generate stubs for user QoL.
 nanobind_add_stub(
   pybliss_ext_stub
   MODULE pybliss_ext
   OUTPUT __init__.pyi
-  PYTHON_PATH "${CMAKE_INSTALL_PREFIX}/pybliss"
+  PYTHON_PATH ${PYPATH}
   DEPENDS pybliss_ext
 )
 
