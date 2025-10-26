@@ -15,7 +15,7 @@ dependencies:
   - "sphinx-math-dollar"
   - "pytools"
   - "sphinx-copybutton"
-  - "insipid_sphinx_theme"
+  - "insipid_sphinx_theme==0.4.2"
   - "IPython"
   - "ipykernel"
   - "jupyter"
