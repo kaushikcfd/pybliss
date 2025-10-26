@@ -69,6 +69,9 @@ skip = [
   "*_i686",              # i686 does not have enough memory for LTO to complete
 ]
 
+[tool.black]
+line-length = 80
+
 # Needed for full C++17 support
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "10.14"
@@ -96,3 +99,5 @@ extend-select = [
   "FA",
   "TC",
 ]
+
+ignore = ["N803", "N806"]
