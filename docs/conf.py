@@ -82,7 +82,7 @@ html_sidebars = {
 project = "insipid-sphinx-theme"
 # html_title = 'Insipid Sphinx Theme'
 html_short_title = "insipid"
-version = "2025.3"
+version = "2025.4"
 
 
 # -- Page footer --------------------------------------------------------------
