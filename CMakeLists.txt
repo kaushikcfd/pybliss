@@ -67,10 +67,10 @@ endif()
 nanobind_add_stub(
   pybliss_ext_stub
   MODULE pybliss_ext
-  OUTPUT __init__.pyi
+  OUTPUT pybliss_ext.pyi
   PYTHON_PATH ${PYPATH}
   DEPENDS pybliss_ext
 )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.pyi DESTINATION pybliss)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pybliss_ext.pyi DESTINATION pybliss)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/pybliss/py.typed DESTINATION pybliss)
