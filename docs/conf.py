@@ -79,9 +79,9 @@ html_sidebars = {
 
 # -- Project information ------------------------------------------------------
 
-project = "insipid-sphinx-theme"
-# html_title = 'Insipid Sphinx Theme'
-html_short_title = "insipid"
+project = "pybliss"
+html_title = "PyBliss"
+html_short_title = "pybliss"
 version = "2025.4"
 
 
