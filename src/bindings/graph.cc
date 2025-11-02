@@ -21,7 +21,10 @@ template <typename GraphT>
 static inline __FORCE_INLINE void
 bind_abstractgraph(nb::module_ &m, const char *class_name_in_python) {
   nb::class_<GraphT> graph(m, class_name_in_python, R"(
-                          Vertex-colored graph.
+                          Vertex-colored graph. The vertices are labeled using
+                          unsigned integers in the set :math:`\{0, 1, \ldots,
+                          N-1\}`, where :math:`N` is the number of the vertices
+                          in the graph.
 
                           .. automethod:: __init__
                           .. automethod:: set_verbose_level

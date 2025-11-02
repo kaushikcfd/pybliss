@@ -31,6 +31,10 @@ def _from_numpy_checks(
     assert (
         c.shape[0] == N
     ), "'c' should have a color for every vertex in the graph."
+    assert E.shape[1] == 2, "'E' must have 2 columns."
+    assert np.all(
+        np.logical_and(E >= 0, E < N)
+    ), "'E' must use 0-based labeling of vertices."
 
 
 def _graph_or_digraph_from_numpy(
@@ -60,7 +64,8 @@ def graph_from_numpy(
     :arg E: A 2D :class:`numpy.ndarray` of shape
         :math:`N_{\mathrm{edges}} \times 2`, where :math:`N_{\mathrm{edges}}` is
         the number of edges in G. Each row in *E* is the of the form ``[i, j]``
-        to denote that there is an edge between ``i`` and ``j`` in *G*.
+        to denote that there is an edge between ``i`` and ``j`` in *G*. Note
+        that :math:`i, j \in \{0, 1, \ldots, N - 1\}`.
     :arg c: An *N*-long column vector such that ``c[i]`` corresponds to the
         color of i-th vertex in G.
     """
@@ -83,7 +88,8 @@ def digraph_from_numpy(
     :arg E: A 2D :class:`numpy.ndarray` of shape
         :math:`N_{\mathrm{edges}} \times 2`, where :math:`N_{\mathrm{edges}}` is
         the number of edges in G. Each row in *E* is the of the form ``[i, j]``
-        to denote that there is an edge from ``i`` to ``j`` in *G*.
+        to denote that there is an edge from ``i`` to ``j`` in *G*. Note that
+        :math:`i, j \in \{0, 1, \ldots, N - 1\}`.
     :arg c: An *N*-long column vector such that ``c[i]`` corresponds to the
         color of i-th vertex in G.
     """
@@ -128,11 +134,13 @@ def _parse_dimacs(
         if lines[i].startswith("n"):
             node_i, c = [int(val) for val in lines[i][2:].strip().split(" ")]
             assert c >= 0
+            # :facepalm: dimacs uses 1-based system for labeling vertices.
             colors[node_i - 1] = c
         elif lines[i].startswith("e"):
             node_i, node_j = [
                 int(val) for val in lines[i][2:].strip().split(" ")
             ]
+            # :facepalm: dimacs uses 1-based system for labeling vertices.
             edges[i_edge, 0] = node_i - 1
             edges[i_edge, 1] = node_j - 1
             i_edge += 1
@@ -157,7 +165,7 @@ def graph_to_numpy(
       :math:`N_{\mathrm{edges}} \times 2`, where :math:`N_{\mathrm{edges}}` is
       the number of edges in *G*. Each row of *E* has the form ``[i, j]``,
       indicating that there is an edge between vertex ``i`` and vertex ``j`` in
-      *G*.
+      *G*. Note that :math:`i, j \in \{0, 1, \ldots, N - 1\}`.
     - **c** is a 1D :class:`numpy.ndarray` of length :math:`N` such that
       ``c[i]`` corresponds to the color of the *i*-th vertex in *G*.
     """
@@ -177,6 +185,7 @@ def digraph_to_numpy(
       :math:`N_{\mathrm{edges}} \times 2`, where :math:`N_{\mathrm{edges}}` is
       the number of edges in *G*. Each row of *E* has the form ``[i, j]``,
       indicating that there is an edge from vertex ``i`` to vertex ``j`` in *G*.
+      Note that :math:`i, j \in \{0, 1, \ldots, N - 1\}`.
     - **c** is a 1D :class:`numpy.ndarray` of length :math:`N` such that
       ``c[i]`` corresponds to the color of the *i*-th vertex in *G*.
     """
