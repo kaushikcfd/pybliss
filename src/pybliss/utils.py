@@ -7,26 +7,15 @@ import numpy as np
 from .pybliss_ext import (
     Digraph,
     Graph,
-    permutation_to_str,
-    print_permutation_to_file,
 )
 
 __doc__ = """
-.. autofunction:: permutation_to_str
-.. autofunction:: print_permutation_to_file
 .. autofunction:: graph_from_numpy
 .. autofunction:: digraph_from_numpy
 .. autofunction:: graph_to_numpy
 .. autofunction:: digraph_to_numpy
 """
 
-
-__all__ = [
-    "digraph_from_numpy",
-    "graph_from_numpy",
-    "permutation_to_str",
-    "print_permutation_to_file",
-]
 
 GT = TypeVar("GT", Graph, Digraph)
 
@@ -71,7 +60,7 @@ def graph_from_numpy(
     :arg E: A 2D :class:`numpy.ndarray` of shape
         :math:`N_{\mathrm{edges}} \times 2`, where :math:`N_{\mathrm{edges}}` is
         the number of edges in G. Each row in *E* is the of the form ``[i, j]``
-        to denote that there is an edge from ``i`` to ``j`` in *G*.
+        to denote that there is an edge between ``i`` and ``j`` in *G*.
     :arg c: An *N*-long column vector such that ``c[i]`` corresponds to the
         color of i-th vertex in G.
     """
@@ -167,7 +156,8 @@ def graph_to_numpy(
     - **E** is a 2D :class:`numpy.ndarray` of shape
       :math:`N_{\mathrm{edges}} \times 2`, where :math:`N_{\mathrm{edges}}` is
       the number of edges in *G*. Each row of *E* has the form ``[i, j]``,
-      indicating that there is an edge from vertex ``i`` to vertex ``j`` in *G*.
+      indicating that there is an edge between vertex ``i`` and vertex ``j`` in
+      *G*.
     - **c** is a 1D :class:`numpy.ndarray` of length :math:`N` such that
       ``c[i]`` corresponds to the color of the *i*-th vertex in *G*.
     """
