@@ -82,7 +82,7 @@ html_sidebars = {
 project = "pybliss"
 html_title = "PyBliss"
 html_short_title = "pybliss"
-version = "2025.4"
+version = "2025.5"
 
 
 # -- Page footer --------------------------------------------------------------
