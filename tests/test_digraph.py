@@ -50,4 +50,5 @@ def test_change_color_get_color():
     for i in range(3):
         assert k3.get_color(i) == i
 
+
 # TODO: Add tests for Digraph.get_caonnical_from, Digraph.find_automorphisms.

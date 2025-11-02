@@ -2,3 +2,5 @@
 build/
 _build/
 .ipynb_checkpoints/
+*.dot
+*.dimacs

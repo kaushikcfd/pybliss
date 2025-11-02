@@ -21,7 +21,7 @@ def test_graph_from_numpy_0():
         ]
     )
 
-    pentagon_1 = bliss.utils.graph_from_numpy(
+    pentagon_1 = bliss.graph_from_numpy(
         5, np.argwhere(pentagon_adj), np.arange(5) ** 2
     )
 
@@ -46,7 +46,7 @@ def test_digraph_from_numpy_0():
         ]
     )
 
-    pentagon_1 = bliss.utils.digraph_from_numpy(
+    pentagon_1 = bliss.digraph_from_numpy(
         5, np.argwhere(pentagon_adj), np.arange(5) ** 2
     )
 
@@ -60,9 +60,7 @@ def test_graph_to_numpy_0():
 
     for i in range(5):
         pentagon_0.change_color(i, i**2)
-    pentagon_1 = bliss.utils.graph_from_numpy(
-        5, *bliss.utils.graph_to_numpy(pentagon_0)
-    )
+    pentagon_1 = bliss.graph_from_numpy(5, *bliss.graph_to_numpy(pentagon_0))
 
     assert pentagon_0 == pentagon_1
 
@@ -75,8 +73,6 @@ def test_digraph_to_numpy_0():
     for i in range(5):
         pentagon_0.change_color(i, i**2)
 
-    pentagon_1 = bliss.utils.digraph_from_numpy(
-        5, *bliss.utils.graph_to_numpy(pentagon_0)
-    )
+    pentagon_1 = bliss.digraph_from_numpy(5, *bliss.graph_to_numpy(pentagon_0))
 
     assert pentagon_0 == pentagon_1
