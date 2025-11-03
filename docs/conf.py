@@ -22,7 +22,7 @@ html_context = {
     # The 'commit' field is overwritten below (with data from Git).
     # If you prefer, you can also get it from your build environment,
     # e.g. READTHEDOCS_GIT_COMMIT_HASH.
-    "commit": "???",
+    "commit": "main",
 }
 
 # -- Settings for source code -------------------------------------------------
